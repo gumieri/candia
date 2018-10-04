@@ -1,0 +1,6 @@
+github.com/gumieri/typist v0.0.0-20180930011640-a30f9cb3f02d h1:f/7Do8SGv53x8ADceG8Ppqo19jeZN07khlUP8Zlu3qo=
+github.com/gumieri/typist v0.0.0-20180930011640-a30f9cb3f02d/go.mod h1:WcfG796Sv8a7K6ZbIxDIpHOll5cLUzGWx0l/Mlcg9cQ=
+github.com/urfave/cli v1.20.0 h1:fDqGv3UG/4jbVl/QkFwEdddtEDjh/5Ov6X+0B/3bPaw=
+github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
+golang.org/x/crypto v0.0.0-20181001203147-e3636079e1a4 h1:Vk3wNqEZwyGyei9yq5ekj7frek2u7HUfffJ1/opblzc=
+golang.org/x/crypto v0.0.0-20181001203147-e3636079e1a4/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
