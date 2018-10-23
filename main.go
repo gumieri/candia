@@ -12,12 +12,9 @@ import (
 	"sync"
 	"text/tabwriter"
 
-	typistPkg "github.com/gumieri/typist"
 	"github.com/urfave/cli"
 	"golang.org/x/crypto/ssh"
 )
-
-var typist *typistPkg.Typist
 
 var transactionsRegex = regexp.MustCompile(`Transactions:[\t ]*([0-9.]+)`)
 var availabilityRegex = regexp.MustCompile(`Availability:[\t ]*([0-9.]+)`)
@@ -64,11 +61,13 @@ func theSiege(c *cli.Context) {
 	args := c.Args()
 
 	keyPath := "~/.ssh/id_rsa"
+	username := "root"
+	port := "22"
 	var addrs []string
 	var siegeParams []string
 	for i := 0; i < len(args); i++ {
 		switch args[i] {
-		case "--key", "-k":
+		case "--ssh-key":
 			i = i + 1
 
 			if i >= len(args) {
@@ -76,7 +75,23 @@ func theSiege(c *cli.Context) {
 			}
 
 			keyPath = args[i]
-		case "--ssh", "-s":
+		case "--ssh-user":
+			i = i + 1
+
+			if i >= len(args) {
+				log.Fatal("missing value of SSH username address")
+			}
+
+			username = args[i]
+		case "--ssh-port":
+			i = i + 1
+
+			if i >= len(args) {
+				log.Fatal("missing value of SSH username address")
+			}
+
+			port = args[i]
+		case "--ssh-addr":
 			i = i + 1
 
 			if i >= len(args) {
@@ -88,6 +103,12 @@ func theSiege(c *cli.Context) {
 			siegeParams = append(siegeParams, args[i])
 		}
 	}
+
+	data, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		log.Fatal(err)
+	}
+	addrs = append(addrs, strings.Split(strings.TrimSpace(string(data)), "\n")...)
 
 	authMethod, err := publicKeyFile(keyPath)
 	if err != nil {
@@ -101,8 +122,8 @@ func theSiege(c *cli.Context) {
 		go func(addr string) {
 			defer wg.Done()
 
-			conn, err := ssh.Dial("tcp", addr, &ssh.ClientConfig{
-				User:            "root",
+			conn, err := ssh.Dial("tcp", addr+":"+port, &ssh.ClientConfig{
+				User:            username,
 				HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 				Auth:            []ssh.AuthMethod{authMethod},
 			})
@@ -291,13 +312,21 @@ func min(input ...float64) float64 {
 
 var flags = []cli.Flag{
 	cli.StringFlag{
-		Name:  "key, k",
+		Name:  "ssh-key",
 		Value: "~/.ssh/id_rsa",
 		Usage: "SSH identity file (key) address",
 	},
 	cli.StringSliceFlag{
-		Name:  "ssh, s",
+		Name:  "ssh-addr",
 		Usage: "SSH host address",
+	},
+	cli.StringSliceFlag{
+		Name:  "ssh-user",
+		Usage: "SSH username",
+	},
+	cli.StringSliceFlag{
+		Name:  "ssh-port",
+		Usage: "SSH port",
 	},
 }
 
@@ -314,10 +343,8 @@ func main() {
 	app.Flags = flags
 	app.Action = theSiege
 
-	typist = &typistPkg.Typist{
-		In:  os.Stdin,
-		Out: os.Stdout,
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	typist.Must(app.Run(os.Args))
 }
